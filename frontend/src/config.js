@@ -1,5 +1,7 @@
 const config = {
-  apiUrl: process.env.REACT_APP_API_URL || 'http://localhost:5001/api'
+  apiUrl: process.env.NODE_ENV === 'production' 
+    ? 'https://your-backend-url.vercel.app/api' 
+    : 'http://localhost:5000/api'
 };
 
 export default config; 
