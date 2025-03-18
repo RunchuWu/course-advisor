@@ -12,93 +12,10 @@ const courseService = require('./courseService');
 const generateRecommendations = async (queryData) => {
   const { major, interests, query } = queryData;
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Generate response based on query content
-  let response = {
-    message: `Based on your query about ${query.substring(0, 30)}..., here are some course recommendations:`,
-    courses: []
+  return {
+    message: `This is a mock response for a ${major || 'undecided'} major interested in ${interests || 'various subjects'} asking: "${query}"`,
+    courses: null
   };
-  
-  try {
-    // Get courses from database based on query
-    let courses = [];
-    
-    // Map major to department
-    let department = '';
-    if (major) {
-      if (major.toLowerCase().includes('computer science') || major.toLowerCase().includes('cs')) {
-        department = 'Computer Science';
-      } else if (major.toLowerCase().includes('economics') || major.toLowerCase().includes('econ')) {
-        department = 'Economics';
-      } else if (major.toLowerCase().includes('english') || major.toLowerCase().includes('writing')) {
-        department = 'English';
-      }
-    }
-    
-    // Get courses by department if available
-    if (department) {
-      courses = await courseService.getCoursesByDepartment(department);
-    }
-    
-    // If no courses found or no department specified, search by keywords
-    if (courses.length === 0) {
-      // Extract keywords from interests and query
-      const keywords = [];
-      
-      if (interests) {
-        interests.split(',').forEach(interest => {
-          keywords.push(interest.trim());
-        });
-      }
-      
-      // Add common keywords from the query
-      const queryWords = query.toLowerCase().split(' ');
-      const relevantWords = queryWords.filter(word => 
-        word.length > 3 && 
-        !['what', 'which', 'should', 'could', 'would', 'take', 'recommend'].includes(word)
-      );
-      
-      keywords.push(...relevantWords);
-      
-      // Search for courses using keywords
-      for (const keyword of keywords) {
-        if (keyword) {
-          const keywordCourses = await courseService.searchCourses(keyword);
-          courses.push(...keywordCourses);
-        }
-      }
-      
-      // Remove duplicates
-      courses = Array.from(new Set(courses.map(course => course.code)))
-        .map(code => courses.find(course => course.code === code));
-    }
-    
-    // Limit to 5 courses
-    courses = courses.slice(0, 5);
-    
-    // Format courses for response
-    response.courses = courses.map(course => ({
-      code: course.code,
-      name: course.name,
-      description: course.description
-    }));
-    
-    // If no courses found, use fallback
-    if (response.courses.length === 0) {
-      return generateFallbackRecommendations(queryData);
-    }
-    
-    // Enhance the response message
-    response.message = `Based on your ${major || ''} major and interest in ${interests || 'various subjects'}, here are some recommended courses at Duke University that might help with your query: "${query}"`;
-    
-    return response;
-  } catch (error) {
-    console.error('Error generating recommendations from database:', error.message);
-    // Use fallback if database query fails
-    return generateFallbackRecommendations(queryData);
-  }
 };
 
 /**
